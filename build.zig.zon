@@ -1,7 +1,9 @@
 .{
     .name = "temphia-zig",
     .version = "0.0.0",
-    .dependencies = .{},
+    .dependencies = .{
+        .sqlite = .{ .url = "https://github.com/vrischmann/zig-sqlite/archive/a3095acc98ef1eb32549dedac032bba8399afca0.tar.gz", .hash = "12203f7d14722debe8f1a2168f28a262aaa5ec2457a7a975fc7dcc1123ed11597c98" },
+    },
 
     .paths = .{
         "build.zig",
