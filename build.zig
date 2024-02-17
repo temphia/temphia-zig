@@ -23,19 +23,49 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(exe);
 
-    // deps start
+    // ########_DEPS_START_########
 
+    // sqlite
     const sqlite = b.dependency("sqlite", .{
         .target = target,
         .optimize = optimize,
     });
 
     exe.root_module.addImport("sqlite", sqlite.module("sqlite"));
-
-    // links the bundled sqlite3, so leave this out if you link the system one
     exe.linkLibrary(sqlite.artifact("sqlite"));
 
-    // deps end
+    lib.root_module.addImport("sqlite", sqlite.module("sqlite"));
+    lib.linkLibrary(sqlite.artifact("sqlite"));
+
+    // quickjs
+
+    const quickjs = b.dependency("quickjs", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const libquickjs = b.addStaticLibrary(.{
+        .name = "quick",
+        .target = target,
+        .optimize = optimize,
+    });
+
+    libquickjs.addIncludePath(quickjs.path("."));
+    libquickjs.addCSourceFiles(.{
+        .dependency = quickjs,
+        .files = &[_][]const u8{ "cutils.c", "libbf.c", "libregexp.c", "libbf.c", "libunicode.c", "qjs.c", "qjsc.c", "quickjs-libc.c", "quickjs.c", "unicode_gen.c" },
+        .flags = &.{
+            "-std=c11",
+            "-fno-sanitize=undefined",
+        },
+    });
+
+    // exe.addCSourceFile(.{ .dependency = quickjs });
+
+    exe.addIncludePath(quickjs.path("."));
+    exe.linkLibrary(libquickjs);
+
+    // ########_DEPS_END_########
 
     const run_cmd = b.addRunArtifact(exe);
 
